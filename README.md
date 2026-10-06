@@ -16,16 +16,23 @@ Sistema de ingesta y procesamiento asíncrono para reportes de emergencia comuni
 
 ### Diagrama de Arquitectura
 
+![Diagrama de Arquitectura ResQ-Cloud](./assets/architecture.svg)
+
+<details>
+<summary>Ver código fuente del diagrama (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
-    A["Ciudadanos / Sensores (PWA / IoT)"] -->|POST /reports| B["Amazon API Gateway (HTTP API)"]
-    B -->|Direct Service Integration| C["Amazon SQS (Buffer de Ingesta)"]
-    C -->|DLQ (Dead Letter Queue)| D["Amazon SQS (reports-dlq)"]
-    C -->|Batch Trigger (size=10, window=5s)| E["AWS Lambda (Report Processor)"]
-    E -->|PutItem con Geohash & TTL| F["Amazon DynamoDB (EmergencyReports)"]
-    E -->|Alerta crítica validada| G["Amazon SNS (Topic: ResQ-Alerts)"]
-    G -->|SMS / Email / Webhook| H["Cuerpos de Rescate / Defensa Civil"]
+    A["Ciudadanos / Sensores (PWA / IoT)"] -->|"POST /reports"| B["Amazon API Gateway (HTTP API)"]
+    B -->|"Direct Service Integration"| C["Amazon SQS (Buffer de Ingesta)"]
+    C -->|"DLQ: 3 reintentos fallidos"| D["Amazon SQS (reports-dlq)"]
+    C -->|"Batch Trigger: 10 msgs, 5s"| E["AWS Lambda (Report Processor)"]
+    E -->|"PutItem con Geohash y TTL"| F["Amazon DynamoDB (EmergencyReports)"]
+    E -->|"Alerta critica validada"| G["Amazon SNS (Topic: ResQ-Alerts)"]
+    G -->|"SMS / Email / Webhook"| H["Cuerpos de Rescate / Defensa Civil"]
 ```
+
+</details>
 
 ### Componentes y Responsabilidades
 
